@@ -1,21 +1,23 @@
 {
-  "name": "datingtgbot",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "geolib": "^3.3.1",
-    "mongoose": "^5.11.16",
-    "node-fetch": "^2.6.1",
-    "telegraf": "^3.38.0"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.7"
-  }
+    "name": "datingtgbot",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "nodemon index.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "geolib": "^3.3.1",
+        "mongoose": "^5.11.15",
+        "node-fetch": "^2.6.1",
+        "telegraf": "^3.38.0",
+        "telegraf-question": "^1.1.4"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.7"
+    }
 }
