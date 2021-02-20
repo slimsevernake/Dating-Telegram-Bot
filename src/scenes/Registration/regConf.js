@@ -1,35 +1,34 @@
 module.exports = {
     f(params) {
         const regConf = new params.Scene('reg9')
-        const Profile = require('../../models/profile')
+        const login = require('../../handlers/login')
 
         regConf.enter(async(ctx) => {
             try {
                 await ctx.replyWithPhoto(`${ctx.scene.state.avatar}`, params.Extra.markup((markup) => {
                     markup.resize()
-                }).caption(params.assets.confirmText(ctx.scene.state)).HTML())
-                ctx.reply('Все правильно?', params.Extra.HTML().markup((m) =>
+                }).caption(`<b>${ctx.scene.state.name}, ${ctx.scene.state.age}</b>. ${ctx.scene.state.city} \n\n${ctx.scene.state.decsript}`).HTML())
+                ctx.reply(ctx.i18n.t('reg.conf'), params.Extra.HTML().markup((m) =>
                     m.inlineKeyboard([
-                        m.callbackButton('Так 👍', 'well'),
-                        m.callbackButton('Редагувати анкету 📝', 'edit')
+                        m.callbackButton(ctx.i18n.t('reg.well'), 'well'),
+                        m.callbackButton(ctx.i18n.t('reg.edit'), 'edit')
                     ])
                 ))
             } catch {
                 await ctx.replyWithVideo(`${ctx.scene.state.avatar}`, params.Extra.markup((markup) => {
                     markup.resize()
-                }).caption(params.assets.confirmText(ctx.scene.state)).HTML())
-                ctx.reply('Все правильно?', params.Extra.HTML().markup((m) =>
+                }).caption(`<b>${ctx.scene.state.name}, ${ctx.scene.state.age}</b>. ${ctx.scene.state.city} \n\n${ctx.scene.state.decsript}`).HTML())
+                ctx.reply(ctx.i18n.t('reg.conf'), params.Extra.HTML().markup((m) =>
                     m.inlineKeyboard([
-                        m.callbackButton('Так 👍', 'well'),
-                        m.callbackButton('Редагувати анкету 📝', 'edit')
+                        m.callbackButton(ctx.i18n.t('reg.well'), 'well'),
+                        m.callbackButton(ctx.i18n.t('reg.edit'), 'edit')
                     ])
                 ))
             }
         })
         regConf.action('well', async(ctx) => {
-            await params.config.db(true)
-            await Profile.deleteOne({ chat_id: ctx.from.id })
-            await Profile.create({
+            await ctx.db.Profile.deleteOne({ chat_id: ctx.from.id })
+            await ctx.db.Profile.create({
                 name: ctx.scene.state.name,
                 chat_id: ctx.from.id,
                 gender: ctx.scene.state.gender,
@@ -41,13 +40,11 @@ module.exports = {
                 is_active: true,
                 strikes: 0,
             })
-            await params.config.db(false)
-
-            // ctx.scene.enter('go_main', { host_info: [ctx.scene.state], relations: {}, scaned_city: [] })
+            let relations = await ctx.db.Relation.find({ host_id: ctx.from.id }, { cli_id: 1, _id: 0 })
+            ctx.scene.enter('action_main', { host_info: [ctx.scene.state], relations, scaned_city: [`${ctx.scene.state.city}`] })
         })
         regConf.action('edit', async(ctx) => {
-            await params.config.db(true)
-            await Profile.create({
+            await ctx.db.Profile.create({
                 name: ctx.scene.state.name,
                 chat_id: ctx.from.id,
                 gender: ctx.scene.state.gender,
@@ -59,9 +56,7 @@ module.exports = {
                 is_active: true,
                 strikes: 0,
             })
-            await params.config.db(false)
-
-            // params.login.f(params, ctx)
+            login.f(ctx)
         })
         regConf.on('message', (ctx) => ctx.scene.reenter('reg9'))
 

@@ -11,10 +11,14 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "cyrillic-to-translit-js": "^3.1.0",
+        "dotenv": "^8.2.0",
         "geolib": "^3.3.1",
         "mongoose": "^5.11.15",
         "node-fetch": "^2.6.1",
+        "path": "^0.12.7",
         "telegraf": "^3.38.0",
+        "telegraf-i18n": "^6.6.0",
         "telegraf-question": "^1.1.4"
     },
     "devDependencies": {

@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 
-const relationScheme = new Schema({
+const relationScheme = mongoose.Schema({
     host_id: {
         type: Number,
         required: true
@@ -23,6 +22,6 @@ const relationScheme = new Schema({
     },
 }, { versionKey: false });
 
-const Relation = mongoose.model('Relation', relationScheme)
+// const Relation = mongoose.model('Relation', relationScheme)
 
-module.exports = Relation
+module.exports = relationScheme

@@ -1,13 +1,13 @@
 module.exports = {
-    f(params){
+    f(params) {
         const regIntr = new params.Scene('reg4')
 
         regIntr.enter((ctx) => {
-            ctx.reply(params.assets.interest() , params.Extra.markup((m) =>
+            ctx.replyWithHTML(ctx.i18n.t('reg.int'), params.Extra.markup((m) =>
                 m.inlineKeyboard([
-                m.callbackButton('👦 Хлопці', 'boys'),
-                m.callbackButton('👧 Дівчата', 'girls'),
-                m.callbackButton('👤 Байдуже', 'both')
+                    m.callbackButton(ctx.i18n.t('reg.int_boys'), 'boys'),
+                    m.callbackButton(ctx.i18n.t('reg.int_girls'), 'girls'),
+                    m.callbackButton(ctx.i18n.t('reg.int_both'), 'both')
                 ])
             ))
         })

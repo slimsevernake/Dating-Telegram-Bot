@@ -1,9 +1,9 @@
 module.exports = {
-    f(params){
+    f(params) {
         const regDesc = new params.Scene('reg7')
-        regDesc.enter((ctx) => ctx.reply(params.assets.desript(), params.Extra.markup((m) =>
+        regDesc.enter((ctx) => ctx.replyWithHTML(ctx.i18n.t('reg.desc'), params.Extra.markup((m) =>
             m.inlineKeyboard([
-            m.callbackButton('Пропустити', 'skip')
+                m.callbackButton(ctx.i18n.t('reg.desc_skip'), 'skip')
             ])
         )))
         regDesc.on('text', (ctx) => {

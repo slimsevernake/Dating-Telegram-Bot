@@ -1,8 +1,8 @@
 module.exports = {
-    f(params){
+    f(params) {
         const regAvatar = new params.Scene('reg8')
 
-        regAvatar.enter((ctx) => ctx.reply(params.assets.avatarmsg()))
+        regAvatar.enter((ctx) => ctx.replyWithHTML(ctx.i18n.t('reg.avatar')))
         regAvatar.on('photo', (ctx) => {
             ctx.scene.state.avatar = ctx.message.photo[0].file_id
             ctx.scene.enter('reg9', ctx.scene.state)
@@ -12,7 +12,7 @@ module.exports = {
             ctx.scene.enter('reg9', ctx.scene.state)
         })
         regAvatar.on('message', (ctx) => {
-            ctx.reply(params.assets.avatarmsg())
+            ctx.reply(ctx.i18n.t('reg.avatar'))
         })
 
         return regAvatar

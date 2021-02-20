@@ -1,11 +1,11 @@
 module.exports = {
-    f(params){
+    f(params) {
         const regName = new params.Scene('reg6')
 
         regName.enter((ctx) => {
-            ctx.reply(params.assets.namequest() , params.Extra.markup((m) =>
+            ctx.replyWithHTML(ctx.i18n.t('reg.name'), params.Extra.markup((m) =>
                 m.inlineKeyboard([
-                m.callbackButton(`Мене звати ${ctx.from.first_name}`, 'first_name')
+                    m.callbackButton(ctx.i18n.t('reg.name_btn'), 'first_name')
                 ])
             ))
         })
@@ -20,8 +20,8 @@ module.exports = {
         regName.on('message', (ctx) => {
             ctx.scene.reenter('reg6')
         })
-        
-        
+
+
 
         return regName
     }
