@@ -18,13 +18,13 @@ module.exports = {
         actionMenu.action('close', (ctx) => {
             ctx.reply(ctx.i18n.t('close.main'), params.Extra.HTML().markup((m) =>
                 m.inlineKeyboard([
-                    m.callbackButton(ctx.i18n.t('close.confirm'), 'closing'),
+                    m.callbackButton(ctx.i18n.t('close.confirm'), 'close_confirm'),
                     m.callbackButton(ctx.i18n.t('close.reject'), 'go_back')
                 ])
             ))
         })
 
-        actionMenu.action('closing', async(ctx) => {
+        actionMenu.action('close_confirm', async(ctx) => {
             ctx.reply(ctx.i18n.t('close.bye'))
             await ctx.db.Profile.deleteOne({ chat_id: ctx.from.id }, { is_active: false })
             ctx.scene.leave()

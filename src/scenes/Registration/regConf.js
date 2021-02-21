@@ -44,6 +44,7 @@ module.exports = {
             ctx.scene.enter('action_main', { host_info: [ctx.scene.state], relations, scaned_city: [`${ctx.scene.state.city}`] })
         })
         regConf.action('edit', async(ctx) => {
+            await ctx.db.Profile.deleteOne({ chat_id: ctx.from.id })
             await ctx.db.Profile.create({
                 name: ctx.scene.state.name,
                 chat_id: ctx.from.id,

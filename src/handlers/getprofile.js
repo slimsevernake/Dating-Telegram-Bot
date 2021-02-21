@@ -15,11 +15,9 @@ module.exports = {
                     }
                 }
             } else {
-                console.log(`Валідацію НЕ пройдено`)
                 fined++
             }
             if (!fined) {
-                console.log(`Знайшли кандидата з міста ${ctx.scene.state.host_info[0].city}`);
                 ctx.scene.state.cli_info = profile[i];
                 break;
             }
@@ -65,7 +63,7 @@ async function sendProfile(ctx, cli_info) {
                     ]
                 ])
             ))
-        } catch {
+        } catch (err) {
             await ctx.replyWithVideo(`${cli_info.avatar}`, Extra.markup((markup) => {
                 markup.resize()
             }).caption(`<b>${cli_info.name}, ${cli_info.age}</b>. ${cli_info.city} \n\n${cli_info.decsript}`).HTML().markup((m) =>
@@ -82,7 +80,6 @@ async function sendProfile(ctx, cli_info) {
             ))
         }
     } catch { // All of clients had been shown, getCityCoords
-        console.log(`Нікого нема з м. ${ctx.scene.state.host_info[0].city}`)
         getCityCoords(ctx)
     }
 }
@@ -117,12 +114,8 @@ async function getNearlyCity(ctx, lat, lng) {
     if (ctx.scene.state.nearly_cities == undefined || !ctx.scene.state.nearly_cities.length) {
         let cities = await ctx.db.City.find({ city_name: { $ne: ctx.scene.state.host_info[0].city } })
         cities.forEach((e, i) => {
-            if (scanedCities.length) {
-                if (scanedCities.some((el) => el == e.city_name)) {
-                    cities.splice(i, 1);
-                } else {
-                    e.distance = geolib.getDistance({ latitude: lat, longitude: lng }, { latitude: e.city_lat, longitude: e.city_lng }, 1) / 1000
-                }
+            if (scanedCities.some((el) => el == e.city_name)) {
+                cities.splice(i, 1);
             } else {
                 e.distance = geolib.getDistance({ latitude: lat, longitude: lng }, { latitude: e.city_lat, longitude: e.city_lng }, 1) / 1000
             }
@@ -142,6 +135,6 @@ function updateScaned(ctx, cities) {
         ctx.scene.state.host_info[0].city = cities[0].city_name
         ctx.scene.enter('action_main', ctx.scene.state)
     } catch {
-        console.log(`МІСТА СЯ СКІНЧИЛИ`)
+        ctx.reply(`Ви переглянули всі анкети, очікуйте з часом хтось Вам відповість або з'являться нові анкети`)
     }
 }
