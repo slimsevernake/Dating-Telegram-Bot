@@ -39,6 +39,9 @@ const profileScheme = mongoose.Schema({
     strikes: {
         type: Number,
         required: true
+    },
+    activities_block: {
+        type: Boolean,
     }
 }, { versionKey: false });
 

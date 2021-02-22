@@ -26,7 +26,11 @@ module.exports = {
 
         actionMenu.action('close_confirm', async(ctx) => {
             ctx.reply(ctx.i18n.t('close.bye'))
-            await ctx.db.Profile.deleteOne({ chat_id: ctx.from.id }, { is_active: false })
+            await ctx.db.Profile.deleteOne({ chat_id: ctx.from.id })
+            await ctx.db.Relation.deleteMany({ host_id: ctx.from.id })
+            await ctx.db.Relation.deleteMany({ cli_id: ctx.from.id })
+            console.log(`${ctx.from.first_name} have just delete profile`)
+
             ctx.scene.leave()
         })
         actionMenu.action('go_back', (ctx) => ctx.scene.enter('action_menu', ctx.scene.state))

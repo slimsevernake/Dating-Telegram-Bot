@@ -96,7 +96,17 @@ async function showProfile(ctx, message, cli_info) {
     }
 }
 
-function matchHandler(ctx, params) {
+async function matchHandler(ctx, params) {
     ctx.replyWithHTML(`${ctx.i18n.t('likely.climatch')} <a href="tg://user?id=${ctx.scene.state.host.chat_id}">${ctx.scene.state.host.name}</a>`)
-    ctx.telegram.sendMessage(ctx.scene.state.host.chat_id, `${ctx.i18n.t('likely.hostmatch')} <a href="tg://user?id=${ctx.from.id}">${ctx.from.first_name}</a>`, params.Extra.HTML())
+    try {
+        ctx.telegram.sendMessage(ctx.scene.state.host.chat_id, `${ctx.i18n.t('likely.hostmatch')} <a href="tg://user?id=${ctx.from.id}">${ctx.from.first_name}</a>`, params.Extra.HTML())
+    } catch (err) {
+        if (err.response && err.response.error_code === 403) {
+            await ctx.db.Relation.deleteMany({ host_id: ctx.from.id })
+            await ctx.db.Relation.deleteMany({ cli_id: ctx.from.id })
+            await ctx.db.Profile.deleteOne({ chat_id: ctx.from.id })
+            await ctx.db.User.deleteOne({ chat_id: ctx.from.id })
+            console.log(`${ctx.scene.state.host.chat_id} is unSub, so i delete it from DB`)
+        } else { console.log(err.message) }
+    }
 }

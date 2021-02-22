@@ -5,7 +5,9 @@ module.exports = {
 
         profileDescript.enter((ctx) => ctx.replyWithHTML(ctx.i18n.t('reg.desc')))
         profileDescript.on('text', async(ctx) => {
-            await ctx.db.Profile.updateOne({ chat_id: ctx.from.id }, { decsript: ctx.message.text })
+            ctx.message.text = ctx.message.text.replace(/\./g, ' ');
+            ctx.scene.state.decsript = ctx.message.text.replace(/@/g, ' ');
+            await ctx.db.Profile.updateOne({ chat_id: ctx.from.id }, { decsript: ctx.scene.state.decsript })
             login.f(ctx)
         })
         profileDescript.on('message', (ctx) => {

@@ -7,7 +7,8 @@ module.exports = {
             ])
         )))
         regDesc.on('text', (ctx) => {
-            ctx.scene.state.decsript = ctx.message.text
+            ctx.message.text = ctx.message.text.replace(/\./g, ' ');
+            ctx.scene.state.decsript = ctx.message.text.replace(/@/g, ' ');
             ctx.scene.enter('reg8', ctx.scene.state)
         })
         regDesc.action('skip', (ctx) => {

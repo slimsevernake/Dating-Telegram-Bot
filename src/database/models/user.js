@@ -11,6 +11,9 @@ const userScheme = mongoose.Schema({
     city: {
         type: String,
     },
+    last_login: {
+        type: String,
+    }
 }, { versionKey: false });
 
 module.exports = userScheme

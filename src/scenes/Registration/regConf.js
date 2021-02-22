@@ -39,7 +39,10 @@ module.exports = {
                 avatar: ctx.scene.state.avatar,
                 is_active: true,
                 strikes: 0,
+                activities: 0,
+                activities_block: false
             })
+            await ctx.db.Relation.deleteMany({ cli_id: ctx.from.id })
             let relations = await ctx.db.Relation.find({ host_id: ctx.from.id }, { cli_id: 1, _id: 0 })
             ctx.scene.enter('action_main', { host_info: [ctx.scene.state], relations, scaned_city: [`${ctx.scene.state.city}`] })
         })
@@ -56,7 +59,9 @@ module.exports = {
                 avatar: ctx.scene.state.avatar,
                 is_active: true,
                 strikes: 0,
+                activities_block: false,
             })
+            await ctx.db.Relation.deleteMany({ cli_id: ctx.from.id })
             login.f(ctx)
         })
         regConf.on('message', (ctx) => ctx.scene.reenter('reg9'))

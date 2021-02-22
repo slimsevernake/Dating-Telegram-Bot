@@ -1,27 +1,23 @@
+const profileMenu = require('../scenes/Profile/profileMenu')
+
 module.exports = {
     async f(ctx) {
         ctx.scene.state.cli_info = {}
         let profile = await ctx.db.Profile.find({ city: ctx.scene.state.host_info[0].city, chat_id: { $ne: ctx.from.id }, is_active: true })
-
+        if (ctx.scene.state.relations.length) {
+            profile = profile.filter(e => {
+                if (ctx.scene.state.relations.some(el => e.chat_id == el.cli_id)) {
+                    return false
+                } else { return true }
+            })
+        }
         for (let i = 0; i < profile.length; i++) {
-            let fined = 0
-
             if (profileValidate(ctx, profile[i])) {
-                for (let p = 0; p < ctx.scene.state.relations.length; p++) {
-                    if (ctx.scene.state.relations == false) break;
-                    if (profile[i].chat_id == ctx.scene.state.relations[p].cli_id) {
-                        fined++;
-                        break;
-                    }
-                }
-            } else {
-                fined++
-            }
-            if (!fined) {
                 ctx.scene.state.cli_info = profile[i];
                 break;
             }
         }
+
         sendProfile(ctx, ctx.scene.state.cli_info)
     }
 }
@@ -31,16 +27,34 @@ function profileValidate(ctx, cli_info) {
     if (ctx.scene.state.host_info[0].gender != cli_info.interest && cli_info.interest != 2) { return false }
 
     // Age validation
-    if (ctx.scene.state.host_info[0].age < 16 && cli_info.age > 16) {
-        return false
-    } else if (ctx.scene.state.host_info[0].age >= 16 && ctx.scene.state.host_info[0].age < 25) {
-        if (cli_info.age < 16 || cli_info.age > 25) { return false }
-    } else if (ctx.scene.state.host_info[0].age >= 25 && ctx.scene.state.host_info[0].age < 35) {
-        if (cli_info.age < 25 || cli_info.age > 35) { return false }
-    } else if (ctx.scene.state.host_info[0].age >= 35 && ctx.scene.state.host_info[0].age < 60) {
-        if (cli_info.age < 35 || cli_info.age > 60) { return false }
-    }
+    const host_age = ctx.scene.state.host_info[0].age
+    const cli_age = cli_info.age
 
+    if (ctx.scene.state.host_info[0].gender == 1) {
+        if (host_age < 16 && cli_age > 16) {
+            return false
+        } else if (host_age >= 16 && host_age < 19) {
+            if (cli_age < 16 || cli_age > 19) { return false }
+        } else if (host_age >= 19 && host_age <= 20) {
+            if (cli_age <= 16 || cli_age > 20) { return false }
+        } else if (host_age > 20 && host_age <= 25) {
+            if (cli_age < 18 || cli_age > 24) { return false }
+        } else if (host_age > 25) {
+            if (cli_age < 24) { return false }
+        }
+    } else {
+        if (host_age < 16 && cli_age > 18) {
+            return false
+        } else if (host_age >= 16 && host_age < 19) {
+            if (cli_age < 18 || cli_age > 20) { return false }
+        } else if (host_age >= 19 && host_age <= 20) {
+            if (cli_age < 20 || cli_age > 23) { return false }
+        } else if (host_age > 20 && host_age <= 25) {
+            if (cli_age < 23 || cli_age > 30) { return false }
+        } else if (host_age > 25) {
+            if (cli_age < 30) { return false }
+        }
+    }
     return true
 }
 
@@ -128,13 +142,14 @@ async function getNearlyCity(ctx, lat, lng) {
     updateScaned(ctx, ctx.scene.state.nearly_cities);
 }
 
-function updateScaned(ctx, cities) {
+async function updateScaned(ctx, cities) {
     try {
         ctx.scene.state.scaned_city.push(`${cities[0].city_name}`)
 
         ctx.scene.state.host_info[0].city = cities[0].city_name
         ctx.scene.enter('action_main', ctx.scene.state)
     } catch {
-        ctx.reply(`Ви переглянули всі анкети, очікуйте з часом хтось Вам відповість або з'являться нові анкети`)
+        await ctx.replyWithHTML(ctx.i18n.t('action.over'))
+        ctx.scene.enter('action_menu', ctx.scene.state)
     }
 }

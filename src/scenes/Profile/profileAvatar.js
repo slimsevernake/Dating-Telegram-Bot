@@ -6,10 +6,12 @@ module.exports = {
         profileAvatar.enter((ctx) => ctx.replyWithHTML(ctx.i18n.t('reg.avatar')))
         profileAvatar.on('photo', async(ctx) => {
             await ctx.db.Profile.updateOne({ chat_id: ctx.from.id }, { avatar: ctx.message.photo[0].file_id })
+            await ctx.db.Relation.deleteMany({ cli_id: ctx.from.id })
             login.f(ctx)
         })
         profileAvatar.on('video', async(ctx) => {
             await ctx.db.Profile.updateOne({ chat_id: ctx.from.id }, { avatar: ctx.message.video.file_id })
+            await ctx.db.Relation.deleteMany({ cli_id: ctx.from.id })
             login.f(ctx)
         })
         profileAvatar.on('message', (ctx) => {
