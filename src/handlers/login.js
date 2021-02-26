@@ -6,7 +6,10 @@ module.exports = {
             const login = await ctx.db.User.findOne({ chat_id: ctx.from.id }, { last_login: 1, _id: 0 })
             await ctx.db.User.updateOne({ chat_id: ctx.from.id }, { last_login: moment().format('DD.MM.YYYY') }, { new: false })
             try {
-                if (login.last_login.split('.')[0] != moment().format('DD')) { user.activities_block = false }
+                if (login.last_login.split('.')[0] != moment().format('DD')) {
+                    await ctx.db.Profile.updateOne({ chat_id: ctx.from.id }, { activities_block: false })
+                    user.activities_block = false
+                }
             } catch {
                 user.activities_block = false
             }
@@ -22,7 +25,11 @@ module.exports = {
                 delete relations[i].cli_id
             });
 
-            ctx.scene.enter('prof_menu', { host_info: user, relations: relations, scaned_city: [`${user[0].city}`] })
+            if (user[0].likes) {
+                ctx.scene.enter('action_main', { host_info: user, relations: relations, scaned_city: [`${user[0].city}`] })
+            } else {
+                ctx.scene.enter('prof_menu', { host_info: user, relations: relations, scaned_city: [`${user[0].city}`] })
+            }
         } else {
             ctx.scene.enter('reg1')
         }

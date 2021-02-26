@@ -7,10 +7,11 @@ module.exports = {
             let likes = await ctx.db.Relation.find({ cli_id: ctx.from.id, host_like: true, cli_checked: false })
             if (likes.length) {
                 ctx.scene.state.likes = likes
+                await ctx.db.Profile.updateOne({ chat_id: ctx.from.id }, { likes: 0 })
                 ctx.scene.enter('liked_main', ctx.scene.state)
             } else {
                 ctx.session.activities = ctx.session.activities || 0
-                if (ctx.session.activities > 30 || ctx.scene.state.host_info.activities_block) {
+                if (ctx.session.activities > 5 || ctx.scene.state.host_info.activities_block) {
                     await ctx.replyWithHTML(ctx.i18n.t('activity.catch'))
                     await ctx.db.Profile.updateOne({ chat_id: ctx.from.id }, { activities_block: true })
                     ctx.scene.enter('action_menu', ctx.scene.state)
@@ -36,6 +37,19 @@ module.exports = {
                     cli_checked: false
                 })
             await ctx.scene.state.relations.push({ cli_id: ctx.scene.state.cli_info.chat_id })
+            await ctx.db.Profile.updateOne({ chat_id: ctx.scene.state.cli_info.chat_id }, { $inc: { likes: 1 } }, { returnNewDocument: true, useFindAndModify: false })
+            let likesMsg = await ctx.db.Profile.findOne({ chat_id: ctx.scene.state.cli_info.chat_id })
+            if (likesMsg.likes % 3 == false) {
+                try {
+                    ctx.telegram.sendMessage(ctx.scene.state.cli_info.chat_id, `${ctx.i18n.t('likely.alert1')} <b>${likesMsg.likes} ${ctx.i18n.t('likely.alert2')}</b>\n\n${ctx.i18n.t('likely.alert3')}`, params.Extra.HTML().markup((m) =>
+                        m.inlineKeyboard([
+                            m.callbackButton(ctx.i18n.t('likely.alertbtn'), 'rndmsht')
+                        ])
+                    ))
+                } catch (err) {
+                    console.log(err)
+                }
+            }
             ctx.scene.reenter('action_main', ctx.scene.state)
         })
         actionMain.action('no', async(ctx) => {

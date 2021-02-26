@@ -23,9 +23,11 @@ bot.use(i18n.middleware());
 bot.context.db = db;
 bot.context.i18n = i18n;
 
+db.Profile.updateMany({}, { likes: 0 })
+
 scenes.f(bot);
 
-bot.command("spam", (ctx) => spam.f(ctx));
+bot.command('spam', (ctx) => spam.f(ctx))
 bot.on("message", (ctx) => login.f(ctx));
 bot.on("callback_query", (ctx) => login.f(ctx));
 

@@ -42,7 +42,10 @@ const profileScheme = mongoose.Schema({
     },
     activities_block: {
         type: Boolean,
-    }
+    },
+    likes: {
+        type: Number,
+    },
 }, { versionKey: false });
 
 // const Profile = mongoose.model('Profile', profileScheme)
