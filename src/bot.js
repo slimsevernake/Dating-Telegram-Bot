@@ -1,7 +1,7 @@
 const { Telegraf } = require("telegraf");
 const I18n = require("telegraf-i18n");
 const path = require("path");
-const scenes = require(`./handlers/scenes`);
+const getScenes = require(`./handlers/scenes`);
 const login = require(`./handlers/login`);
 const { db } = require("./database");
 
@@ -22,7 +22,7 @@ bot.use(i18n.middleware());
 bot.context.db = db;
 bot.context.i18n = i18n;
 
-scenes.f(bot);
+getScenes(bot)
 
 bot.on("message", ctx => login(ctx));
 bot.on("callback_query", ctx => login(ctx));

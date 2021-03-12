@@ -1,25 +1,30 @@
 const profileMenu = require('../scenes/Profile/profileMenu')
 
-module.exports = {
-    async f(ctx) {
-        ctx.scene.state.cli_info = {}
-        let profile = await ctx.db.Profile.find({ city: ctx.scene.state.host_info[0].city, chat_id: { $ne: ctx.from.id }, is_active: true })
-        if (ctx.scene.state.relations.length) {
-            profile = profile.filter(e => {
-                if (ctx.scene.state.relations.some(el => e.chat_id == el.cli_id)) {
-                    return false
-                } else { return true }
-            })
-        }
-        for (let i = 0; i < profile.length; i++) {
-            if (profileValidate(ctx, profile[i])) {
-                ctx.scene.state.cli_info = profile[i];
-                break;
-            }
-        }
-
-        sendProfile(ctx, ctx.scene.state.cli_info)
+async function getProfile(ctx) {
+    ctx.scene.state.cli_info = {}
+    let profile = await ctx.db.Profile.find({ city: ctx.scene.state.host_info[0].city, chat_id: { $ne: ctx.from.id }, is_active: true })
+    if (ctx.scene.state.relations.length) {
+        profile = profile.filter(e => {
+            if (ctx.scene.state.relations.some(el => e.chat_id == el)) {
+                return false
+            } else { return true }
+        })
     }
+
+    profile.sort((a, b) => {
+        return b.attraction - a.attraction
+    })
+
+    console.log(profile);
+
+    for (let i = 0; i < profile.length; i++) {
+        if (profileValidate(ctx, profile[i])) {
+            ctx.scene.state.cli_info = profile[i];
+            break;
+        }
+    }
+
+    sendProfile(ctx, ctx.scene.state.cli_info)
 }
 
 function profileValidate(ctx, cli_info) {
@@ -153,3 +158,5 @@ async function updateScaned(ctx, cities) {
         ctx.scene.enter('action_menu', ctx.scene.state)
     }
 }
+
+module.exports = getProfile

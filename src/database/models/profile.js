@@ -46,6 +46,9 @@ const profileScheme = mongoose.Schema({
     likes: {
         type: Number,
     },
+    attraction: {
+        type: Number,
+    }
 }, { versionKey: false });
 
 // const Profile = mongoose.model('Profile', profileScheme)

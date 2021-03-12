@@ -12,7 +12,7 @@ module.exports = {
                 msg_text: ctx.message.text
             })
             await console.log(`User ${ctx.from.first_name} send msg to ${ctx.scene.state.cli_info.name}`)
-            await ctx.scene.state.relations.push({ cli_id: ctx.scene.state.cli_info.chat_id })
+            await ctx.scene.state.relations.push(ctx.scene.state.cli_info.chat_id)
             ctx.scene.enter('action_main', ctx.scene.state)
         })
         actionMail.on('message', (ctx) => { ctx.replyWithHTML(ctx.i18n.t('action.mail_error')) })

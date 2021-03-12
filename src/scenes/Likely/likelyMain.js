@@ -1,55 +1,64 @@
-module.exports = {
-    f(params) {
-        const likelyMain = new params.Scene('liked_main')
-        const login = require('../../handlers/login')
+const scene = params => {
+    const likelyMain = new params.Scene('liked_main')
+    const login = require('../../handlers/login')
 
-        likelyMain.enter(async(ctx) => {
-            await ctx.reply(ctx.i18n.t('likely.start'))
+    likelyMain.enter(async(ctx) => {
+        await ctx.reply(ctx.i18n.t('likely.start'))
+        cliShowing(ctx)
+    })
+    likelyMain.action('yes', async(ctx) => {
+        await ctx.db.Relation.updateOne({ cli_id: ctx.from.id, host_id: ctx.scene.state.likes[0].host_id }, { cli_checked: true })
+        await matchHandler(ctx, params)
+        ctx.scene.state.likes.shift()
+        if (ctx.scene.state.likes.length) {
             cliShowing(ctx)
+        } else {
+            delete ctx.scene.state.host
+            delete ctx.scene.state.likes
+            login(ctx)
+        }
+    })
+    likelyMain.action('no', async(ctx) => {
+        await ctx.db.Relation.updateOne({ cli_id: ctx.from.id, host_id: ctx.scene.state.likes[0].host_id }, { cli_checked: true })
+        ctx.scene.state.likes.shift()
+        if (ctx.scene.state.likes.length) {
+            cliShowing(ctx)
+        } else {
+            delete ctx.scene.state.host
+            delete ctx.scene.state.likes
+            login.f(ctx)
+        }
+    })
+    likelyMain.action('report', async(ctx) => {
+        await ctx.db.Relation.create({
+            host_id: ctx.from.id,
+            cli_id: ctx.scene.state.likes[0].host_id,
+            host_like: false,
+            cli_checked: false,
         })
-        likelyMain.action('yes', async(ctx) => {
-            await ctx.db.Relation.updateOne({ cli_id: ctx.from.id, host_id: ctx.scene.state.likes[0].host_id }, { cli_checked: true })
-            await matchHandler(ctx, params)
-            ctx.scene.state.likes.shift()
-            if (ctx.scene.state.likes.length) {
-                cliShowing(ctx)
-            } else {
-                delete ctx.scene.state.host
-                delete ctx.scene.state.likes
-                login.f(ctx)
-            }
-        })
-        likelyMain.action('no', async(ctx) => {
-            await ctx.db.Relation.updateOne({ cli_id: ctx.from.id, host_id: ctx.scene.state.likes[0].host_id }, { cli_checked: true })
-            ctx.scene.state.likes.shift()
-            if (ctx.scene.state.likes.length) {
-                cliShowing(ctx)
-            } else {
-                delete ctx.scene.state.host
-                delete ctx.scene.state.likes
-                login.f(ctx)
-            }
-        })
-        likelyMain.action('report', async(ctx) => {
-            await ctx.db.Relation.create({
-                host_id: ctx.from.id,
-                cli_id: ctx.scene.state.likes[0].host_id,
-                host_like: false,
-                cli_checked: false,
-            })
-            ctx.scene.state.likes.shift()
-            if (ctx.scene.state.likes) {
-                cliShowing(ctx)
-            } else {
-                delete ctx.scene.state.host
-                delete ctx.scene.state.likes
-                ctx.scene.enter('action_main', ctx.scene.state)
-            }
-        })
-        likelyMain.action('go_exit', (ctx) => login.f(ctx))
+        ctx.scene.state.likes.shift()
+        if (ctx.scene.state.likes) {
+            cliShowing(ctx)
+        } else {
+            delete ctx.scene.state.host
+            delete ctx.scene.state.likes
+            login.f(ctx)
+        }
+    })
+    likelyMain.action('go_exit', (ctx) => login.f(ctx))
 
-        return likelyMain
+    async function matchHandler(ctx, params) {
+        ctx.replyWithHTML(`${ctx.i18n.t('likely.climatch')} <a href="tg://user?id=${ctx.scene.state.host.chat_id}">${ctx.scene.state.host.name}</a>`)
+        try {
+            await ctx.telegram.sendMessage(ctx.scene.state.host.chat_id, `${ctx.i18n.t('likely.hostmatch')} <a href="tg://user?id=${ctx.from.id}">${ctx.from.first_name}</a>`, params.Extra.HTML())
+        } catch (err) {
+            if (err.response && err.response.error_code === 403) {
+                await params.userDeleting(ctx, ctx.scene.state.host.chat_id)
+            } else { console.log(err.message) }
+        }
     }
+
+    return likelyMain
 }
 
 async function cliShowing(ctx) {
@@ -96,17 +105,4 @@ async function showProfile(ctx, message, cli_info) {
     }
 }
 
-async function matchHandler(ctx, params) {
-    ctx.replyWithHTML(`${ctx.i18n.t('likely.climatch')} <a href="tg://user?id=${ctx.scene.state.host.chat_id}">${ctx.scene.state.host.name}</a>`)
-    try {
-        ctx.telegram.sendMessage(ctx.scene.state.host.chat_id, `${ctx.i18n.t('likely.hostmatch')} <a href="tg://user?id=${ctx.from.id}">${ctx.from.first_name}</a>`, params.Extra.HTML())
-    } catch (err) {
-        if (err.response && err.response.error_code === 403) {
-            await ctx.db.Relation.deleteMany({ host_id: ctx.from.id })
-            await ctx.db.Relation.deleteMany({ cli_id: ctx.from.id })
-            await ctx.db.Profile.deleteOne({ chat_id: ctx.from.id })
-            await ctx.db.User.deleteOne({ chat_id: ctx.from.id })
-            console.log(`${ctx.scene.state.host.chat_id} is unSub, so i delete it from DB`)
-        } else { console.log(err.message) }
-    }
-}
+module.exports = scene

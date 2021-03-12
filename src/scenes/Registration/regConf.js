@@ -41,7 +41,8 @@ module.exports = {
                 strikes: 0,
                 activities: 0,
                 activities_block: false,
-                likes: 0
+                likes: 0,
+                attraction: 0
             })
             await ctx.db.Relation.deleteMany({ cli_id: ctx.from.id })
             let relations = await ctx.db.Relation.find({ host_id: ctx.from.id }, { cli_id: 1, _id: 0 })
@@ -61,7 +62,8 @@ module.exports = {
                 is_active: true,
                 strikes: 0,
                 activities_block: false,
-                likes: 0
+                likes: 0,
+                attration: 0
             })
             await ctx.db.Relation.deleteMany({ cli_id: ctx.from.id })
             login.f(ctx)
